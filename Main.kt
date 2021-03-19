@@ -1,44 +1,97 @@
 package sorting
 import java.util.Scanner
 
-fun main() {
+fun main(args: Array<String>) {
     val scan = Scanner(System.`in`)
-    val nums = mutableListOf<Int>()
+    var dataType = "word"
+
+    if (args.size == 2) {
+        dataType = args[1]
+    }
+
+    when (dataType) {
+        "long" -> processNumbers(scan)
+        "line" -> processLines(scan)
+        "word" -> processWords(scan)
+    }
+}
+
+fun processNumbers(scan: Scanner) {
+    var max = 0
+    var count = 0
+    var maxCount = 0
 
     while (scan.hasNextInt()) {
         val num = scan.nextInt()
+        if (num == 999) break
 
-        nums.add(num)
+        if (num > max) {
+            max = num
+            maxCount = 1
+        } else if (num == max) maxCount++
+
+        count++
     }
 
-    val total = nums.size
-    val max = getMax(nums)
-    val count = countMax(max, nums)
-
-    printInfo(total, max, count)
+    val occurRate = maxCount * 1.0 / count
+    printNumberInfo(count, max, maxCount, occurRate)
 }
 
-fun getMax(nums: MutableList<Int>): Int {
-    var max = 0
-
-    for (num in nums) {
-        if (num > max) max = num
-    }
-
-    return max
-}
-
-fun countMax(max: Int, nums: MutableList<Int>): Int {
+fun processLines(scan :Scanner) {
+    var longest = ""
     var count = 0
+    var longestCount = 0
 
-    for (num in nums) {
-        if (num == max) count++
+    while (scan.hasNextLine()) {
+        val line = scan.nextLine()
+        if (line == "exit") break
+
+        if (line.length > longest.length) {
+            longest = line
+            longestCount = 1
+        }
+
+        count++
     }
 
-    return count
+    val occurRate = longestCount * 1.0 / count
+    printLineInfo(count, longest, longestCount, occurRate)
 }
 
-fun printInfo(total: Int, max: Int, count: Int) {
-    println("Total numbers: $total.")
-    println("The greatest number: $max ($count time(s)).")
+fun processWords(scan: Scanner) {
+    var longest = ""
+    var count = 0
+    var longestCount = 0
+
+    while (scan.hasNext()) {
+        val word = scan.next()
+        if (word == "exit") break
+
+        if (word.length > longest.length) {
+            longest = word
+            longestCount = 1
+        }
+
+        count++
+    }
+
+    val occurRate = longestCount * 1.0 / count
+    printWordInfo(count, longest, longestCount, occurRate)
 }
+
+
+fun printNumberInfo(total: Int, max: Int, count: Int, occurRate: Double) {
+    println("Total numbers: $total.")
+    println("The greatest number: $max ($count time(s), ${(occurRate * 100).toInt()}%).")
+}
+
+fun printLineInfo(total: Int, longest: String, count: Int, occurRate: Double) {
+    println("Total lines: $total.")
+    println("The longest line:\n$longest\n($count time(s), ${(occurRate * 100).toInt()}%).")
+}
+
+fun printWordInfo(total: Int, longest: String, count: Int, occurRate: Double) {
+    println("Total words: $total.")
+    println("The longest word: $longest ($count time(s), ${(occurRate * 100).toInt()}%).")
+}
+
