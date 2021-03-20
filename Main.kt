@@ -1,19 +1,44 @@
 package sorting
 import java.util.Scanner
 
+val scan = Scanner(System.`in`)
+
 fun main(args: Array<String>) {
-    val scan = Scanner(System.`in`)
+
+    var operation = "-dataType"
     var dataType = "word"
 
-    if (args.size == 2) {
-        dataType = args[1]
-    }
+    if (args.contains("-sortIntegers")) operation = "-sortIntegers"
+    if (args.size == 2) dataType = args[1]
+    
+    executeOperation(operation, dataType)
+}
 
+fun executeOperation(operation: String, dataType: String) {
+    when (operation) {
+        "-sortIntegers" -> sortIntegers()
+        "-dataType" -> executeProcessing(dataType)
+    }
+}
+
+fun executeProcessing(dataType: String) {
     when (dataType) {
         "long" -> processNumbers(scan)
         "line" -> processLines(scan)
         "word" -> processWords(scan)
     }
+}
+
+fun sortIntegers() {
+    val numbers = mutableListOf<Int>()
+
+    while (scan.hasNextInt()) {
+        val num = scan.nextInt()
+        numbers.add(num)
+    }
+
+    println("Total numbers: ${numbers.size}.")
+    println("Sorted data: ${numbers.sorted().joinToString(" ")}")
 }
 
 fun processNumbers(scan: Scanner) {
