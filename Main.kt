@@ -4,6 +4,8 @@ import java.util.Scanner
 import kotlin.math.roundToInt
 
 val scan = Scanner(System.`in`)
+val numberType = "long"
+val wordType = "word"
 
 data class IntPair(val num: Int, var count: Int)
 data class StringPair(val text: String, var count: Int)
@@ -18,110 +20,52 @@ fun main(args: Array<String>) {
         if (args[i] == "-dataType") dataType = args[i+1]
     }
 
-    executeSort(sortingType, dataType)
+    val values = readInput(dataType)
+    executeSort(sortingType, dataType, values)
 }
 
-fun executeSort(sortingType: String, dataType: String) {
+fun executeSort(sortingType: String, dataType: String, values: MutableList<String>) {
     when (sortingType) {
-        "natural" -> {
-            when (dataType) {
-                "long" -> {
-                    val nums = readInts()
-                    printTotal(nums.size, "numbers")
-                    println("Sorted data: ${nums.sorted().joinToString(" ")}")
-                }
-                "word" -> {
-                    val words = readWords()
-                    printTotal(words.size, "words")
-                    println("Sorted data: ${words.sorted().joinToString(" ")}")
-                }
-                "line" -> {
-                    val lines = readLines()
-                    printTotal(lines.size, "lines")
-                    println("Sorted data: ${lines.sorted().joinToString(" ")}")
-                }
-            }
-        }
-        "byCount" -> {
-            when (dataType) {
-                "long" -> {
-                    val sortedPairs = sortCountInt()
-                    val total = sortedPairs.sumOf { it.count }
-                    printTotal(total, "numbers")
-                    printOccurrences(sortedPairs.map { StringPair(it.num.toString(), it.count) }, total)
-                }
-                "line" -> {
-                    val sortedPairs = sortCountString(dataType)
-                    val total = sortedPairs.sumOf { it.count }
-                    printTotal(total, "numbers")
-                    printOccurrences(sortedPairs, total)
-                }
-                "word" -> {
-                    val sortedPairs = sortCountString(dataType)
-                    val total = sortedPairs.sumOf { it.count }
-                    printTotal(total, "numbers")
-                    printOccurrences(sortedPairs, total)
-                }
-            }
-
-        }
+        "natural" -> sortByNatural(dataType, values)
+        "byCount" -> sortByCount(dataType, values)
     }
 }
 
-fun sortCountInt(): List<IntPair> {
-    val numbers = readInts()
-
-    val countPairs = mutableListOf<IntPair>()
-
-    for (uniqueInt in numbers.toSet()) {
-        val count = numbers.count { it == uniqueInt}
-        countPairs.add(IntPair(uniqueInt, count))
-    }
-
-    return countPairs.sortedWith(compareBy({ it.count }, { it.num }))
+fun sortByNatural(dataType: String, values: MutableList<String>) {
+    printTotal(values.size, dataType)
+    if (dataType == "long") values.sortBy { it.toInt() } else values.sort()
+    printNatural(values, dataType)
 }
 
-fun sortCountString(dataType: String): List<StringPair> {
-    val strings = if (dataType == "line") readLines() else readWords()
-
+fun sortByCount(dataType: String, values: MutableList<String>) {
     val countPairs = mutableListOf<StringPair>()
 
-    for (uniqueString in strings.toSet()) {
-        val count = strings.count { it == uniqueString}
-        countPairs.add(StringPair(uniqueString, count))
+    for (uniqueValue in values.toSet()) {
+        val count = values.count { it == uniqueValue }
+        countPairs.add(StringPair(uniqueValue, count))
     }
 
-    return countPairs.sortedWith(compareBy({ it.count }, { it.text }))
-}
-
-fun readInts(): MutableList<Int> {
-    val numbers = mutableListOf<Int>()
-
-    while (scan.hasNextInt()) {
-        numbers.add(scan.nextInt())
+    val sortedPairs = if (dataType == "long") {
+        countPairs.sortedWith(compareBy({ it.count }, { it.text.toInt()}))
+    } else {
+        countPairs.sortedWith(compareBy({ it.count }, { it.text }))
     }
 
-    return numbers
+    val total = sortedPairs.sumOf { pair -> pair.count}
+    printTotal(total, dataType)
+    printOccurrences(sortedPairs, total)
 }
 
-fun readLines(): MutableList<String> {
-    val lines = mutableListOf<String>()
-
-    while (scan.hasNextLine()) {
-        lines.add(scan.nextLine())
-    }
-
-    return lines
-}
-
-fun readWords(): MutableList<String> {
-    val words = mutableListOf<String>()
+fun readInput(dataType: String): MutableList<String> {
+    val values = mutableListOf<String>()
 
     while (scan.hasNext()) {
-        words.add(scan.next())
+        val value = if (dataType == "line") scan.nextLine() else scan.next()
+        if (value == "exit") break
+        values.add(value)
     }
 
-    return words
+    return values
 }
 
 fun executeProcessing(dataType: String) {
@@ -130,18 +74,6 @@ fun executeProcessing(dataType: String) {
         "line" -> processLines(scan)
         "word" -> processWords(scan)
     }
-}
-
-fun sortIntegers() {
-    val numbers = mutableListOf<Int>()
-
-    while (scan.hasNextInt()) {
-        val num = scan.nextInt()
-        numbers.add(num)
-    }
-
-    println("Total numbers: ${numbers.size}.")
-    println("Sorted data: ${numbers.sorted().joinToString(" ")}")
 }
 
 fun processNumbers(scan: Scanner) {
@@ -208,7 +140,16 @@ fun processWords(scan: Scanner) {
 }
 
 fun printTotal(total: Int, dataType: String) {
-    println("Total $dataType: $total.")
+    val dataTypeText = when (dataType) {
+        numberType -> "numbers"
+        wordType -> "words"
+        else -> "lines"
+    }
+    println("Total $dataTypeText: $total.")
+}
+
+fun printNatural(values : MutableList<String>,dataType: String) {
+    println("Sorted data: ${values.joinToString(" ")}")
 }
 
 fun printOccurrences(sortedPairs: List<StringPair>, total: Int) {
