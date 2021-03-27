@@ -4,8 +4,9 @@ import java.util.Scanner
 import kotlin.math.roundToInt
 
 val scan = Scanner(System.`in`)
-val numberType = "long"
-val wordType = "word"
+const val numberType = "long"
+const val wordType = "word"
+val validArgs = arrayOf("-sortingType", "-dataType")
 
 data class IntPair(val num: Int, var count: Int)
 data class StringPair(val text: String, var count: Int)
@@ -15,13 +16,38 @@ fun main(args: Array<String>) {
     var dataType = "word"
     var sortingType = "natural"
 
-    for (i in args.indices) {
-        if (args[i] == "-sortingType") sortingType = args[i+1]
-        if (args[i] == "-dataType") dataType = args[i+1]
-    }
+    val validInput = isInputValid(args)
 
-    val values = readInput(dataType)
-    executeSort(sortingType, dataType, values)
+    if (validInput) {
+        for (i in args.indices) {
+            if (args[i] == "-sortingType") sortingType = args[i+1]
+            if (args[i] == "-dataType") dataType = args[i+1]
+        }
+
+        val values = readInput(dataType)
+        executeSort(sortingType, dataType, values)
+    }
+}
+
+fun isInputValid(args: Array<String>): Boolean {
+    for (i in args.indices) {
+        if (args[i] == "-sortingType") {
+            if (args.getOrNull(i+1) == null) {
+                println("No sorting type defined!")
+                return false
+            }
+        }
+        if (args[i] == "-dataType") {
+            if (args.getOrNull(i+1) == null) {
+                println("No data type defined!")
+                return false
+            }
+        }
+        if (args[i].contains("-") && args[i] !in validArgs) {
+            println("${args[i]} is not a valid parameter. It will be skipped.")
+        }
+    }
+    return true
 }
 
 fun executeSort(sortingType: String, dataType: String, values: MutableList<String>) {
@@ -62,10 +88,19 @@ fun readInput(dataType: String): MutableList<String> {
     while (scan.hasNext()) {
         val value = if (dataType == "line") scan.nextLine() else scan.next()
         if (value == "exit") break
+        if (dataType == "long" && !isNumber(value)) {
+            println("\"$value\" is not a long. It will be skipped.")
+            continue
+        }
         values.add(value)
     }
 
     return values
+}
+
+fun isNumber(value: String): Boolean {
+    val regex = Regex("""-?\d+""")
+    return value.matches(regex)
 }
 
 fun executeProcessing(dataType: String) {
@@ -173,4 +208,3 @@ fun printWordInfo(total: Int, longest: String, count: Int, occurRate: Double) {
     println("Total words: $total.")
     println("The longest word: $longest ($count time(s), ${(occurRate * 100).toInt()}%).")
 }
-
