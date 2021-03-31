@@ -1,5 +1,5 @@
 package sorting
-import java.lang.reflect.Type
+import java.io.File
 import java.util.Scanner
 import kotlin.math.roundToInt
 
@@ -15,6 +15,8 @@ fun main(args: Array<String>) {
 
     var dataType = "word"
     var sortingType = "natural"
+    var inputFile: String = ""
+    var outputFile: String = ""
 
     val validInput = isInputValid(args)
 
@@ -22,6 +24,8 @@ fun main(args: Array<String>) {
         for (i in args.indices) {
             if (args[i] == "-sortingType") sortingType = args[i+1]
             if (args[i] == "-dataType") dataType = args[i+1]
+            if (args[i] == "-inputFile") inputFile = args[i+1]
+            if (args[i] == "-outputFile") outputFile = args[i+1]
         }
 
         val values = readInput(dataType)
